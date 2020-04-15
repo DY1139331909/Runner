@@ -61,6 +61,10 @@ public class KCBPCli {
 
         int KCBPCLI_SetConnectOption(Pointer hHandle, tagKCBPConnectOption.ByValue stKCBPConnection);
 
+        int KCBPCLI_GetConnectOption(Pointer hHandle, tagKCBPConnectOption.ByReference stKCBPConnection);
+
+        int KCBPCLI_ConnectServer(Pointer hHandle, Pointer ServerName, Pointer UserName, Pointer Password);
+
     }
 
     public static void main(String[] args) {
@@ -73,8 +77,33 @@ public class KCBPCli {
         System.out.println(ret);
         System.out.println(pnVersion.getValue());
         CLibrary.tagKCBPConnectOption.ByValue tagKCBPConnectOption = new CLibrary.tagKCBPConnectOption.ByValue();
+        tagKCBPConnectOption.szServerName = "KCBP1".getBytes();
+        tagKCBPConnectOption.nProtocal = 0;
+        tagKCBPConnectOption.szAddress = "7.72.174.32".getBytes();
+        tagKCBPConnectOption.nPort = 21000;
+        tagKCBPConnectOption.szSendQName = "req1".getBytes();
+        tagKCBPConnectOption.szReceiveQName = "ans1".getBytes();
+//        tagKCBPConnectOption.szReserved = "".getBytes();
         ret = CLibrary.INSTANCE.KCBPCLI_SetConnectOption(KCBPCLIHANDLE.getValue(), tagKCBPConnectOption);
+        CLibrary.tagKCBPConnectOption.ByReference tagKCBPConnectOptionByReference = new CLibrary.tagKCBPConnectOption.ByReference();
+        CLibrary.INSTANCE.KCBPCLI_GetConnectOption(KCBPCLIHANDLE.getValue(), tagKCBPConnectOptionByReference);
         System.out.println(ret);
+        System.out.println(tagKCBPConnectOptionByReference.nPort);
+        System.out.println(tagKCBPConnectOptionByReference.szServerName);
+        System.out.println(tagKCBPConnectOptionByReference.szAddress);
+//        开始连接
+        Pointer ServerName = new Memory(32);
+        ServerName.clear(32);
+        ServerName.setString(0, "KCBP1");
+        Pointer UserName = new Memory(32);
+        ServerName.clear(32);
+        ServerName.setString(0, "KCXP00");
+        Pointer Password = new Memory(32);
+        ServerName.clear(32);
+        ServerName.setString(0, "888888");
+        ret = CLibrary.INSTANCE.KCBPCLI_ConnectServer(KCBPCLIHANDLE.getValue(), ServerName, UserName, Password);
+        System.out.println(ret);
+
 
     }
 }
