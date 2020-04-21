@@ -1,6 +1,8 @@
 import com.sun.jna.*;
 import com.sun.jna.ptr.*;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,7 @@ import java.util.List;
 * */
 public class KCBPCli {
     public interface CLibrary extends Library {
+
         CLibrary INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\KCBPCli" : "c"), CLibrary.class);
         int KCBP_SERVERNAME_MAX = 32;
         int KCBP_DESCRIPTION_MAX = 32;
@@ -70,23 +73,25 @@ public class KCBPCli {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedEncodingException {
         PointerByReference KCBPCLIHANDLE = new PointerByReference(Pointer.NULL);
-        int ret = CLibrary.INSTANCE.KCBPCLI_Init(KCBPCLIHANDLE);
+        int ret;
+        ret = CLibrary.INSTANCE.KCBPCLI_Init(KCBPCLIHANDLE);
+        System.out.println("KCBPCLI_Init: " + ret);
         Pointer hHandle = KCBPCLIHANDLE.getValue();
-        IntByReference pnVersion = new IntByReference();
-        ret = CLibrary.INSTANCE.KCBPCLI_GetVersion(hHandle, pnVersion);
-        System.out.println(ret);
-        System.out.println(pnVersion.getValue());
+//        IntByReference pnVersion = new IntByReference();
+//        ret = CLibrary.INSTANCE.KCBPCLI_GetVersion(hHandle, pnVersion);
+//        System.out.println(ret);
+//        System.out.println(pnVersion.getValue());
         CLibrary.tagKCBPConnectOption tagKCBPConnectOption = new CLibrary.tagKCBPConnectOption.ByValue();
         tagKCBPConnectOption.write();
-        tagKCBPConnectOption.szServerName = "KCBP1".getBytes();
+        tagKCBPConnectOption.szServerName = "KCBP1".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.nProtocal = 0;
-        tagKCBPConnectOption.szAddress = "7.72.174.32".getBytes();
+        tagKCBPConnectOption.szAddress = "10.1.160.167".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.nPort = 21002;
-        tagKCBPConnectOption.szSendQName = "req1".getBytes();
-        tagKCBPConnectOption.szReceiveQName = "ans1".getBytes();
-//        tagKCBPConnectOption.szReserved = "".getBytes();
+        tagKCBPConnectOption.szSendQName = "req1".getBytes(StandardCharsets.UTF_8);
+        tagKCBPConnectOption.szReceiveQName = "ans1".getBytes(StandardCharsets.UTF_8);
+        tagKCBPConnectOption.szReserved = "".getBytes(StandardCharsets.UTF_8);
         ret = CLibrary.INSTANCE.KCBPCLI_SetConnectOption(hHandle, tagKCBPConnectOption);
         CLibrary.tagKCBPConnectOption tagKCBPConnectOptionByReference = new CLibrary.tagKCBPConnectOption();
         ret = CLibrary.INSTANCE.KCBPCLI_GetConnectOption(hHandle, tagKCBPConnectOptionByReference);
@@ -102,6 +107,7 @@ public class KCBPCli {
         String ServerName = "KCBP1";
         String UserName = "KCXP00";
         String Password = "888888";
+
         ret = CLibrary.INSTANCE.KCBPCLI_ConnectServer(hHandle, ServerName, UserName, Password);
         System.out.println("KCBPCLI_ConnectServer: " + ret);
         ret = CLibrary.INSTANCE.KCBPCLI_DisConnect(hHandle);
