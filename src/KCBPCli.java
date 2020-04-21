@@ -87,8 +87,8 @@ public class KCBPCli {
         tagKCBPConnectOption.write();
         tagKCBPConnectOption.szServerName = "KCBP1".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.nProtocal = 0;
-        tagKCBPConnectOption.szAddress = "10.1.160.167".getBytes(StandardCharsets.UTF_8);
-        tagKCBPConnectOption.nPort = 21002;
+        tagKCBPConnectOption.szAddress = "7.72.174.32".getBytes(StandardCharsets.UTF_8);
+        tagKCBPConnectOption.nPort = 21000;
         tagKCBPConnectOption.szSendQName = "req1".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.szReceiveQName = "ans1".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.szReserved = "".getBytes(StandardCharsets.UTF_8);
