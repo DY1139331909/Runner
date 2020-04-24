@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * @author 程浩
  * @date 2020/4/13 18:27
@@ -22,13 +23,21 @@ import java.util.List;
   int*	        IntByReference
 * */
 public class KCBPCli {
+
     public interface CLibrary extends Library {
 
         CLibrary INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\KCBPCli" : "c"), CLibrary.class);
         int KCBP_SERVERNAME_MAX = 32;
         int KCBP_DESCRIPTION_MAX = 32;
 
+        //        @Structure.FieldOrder(value = {"szServerName","nProtocal","szAddress","nPort","szSendQName","szReceiveQName","szReserved"})
         public static class tagKCBPConnectOption extends Structure {
+            public tagKCBPConnectOption() {
+
+                setAlignType(Structure.ALIGN_NONE);
+
+            }
+
             public static class ByReference extends tagKCBPConnectOption implements Structure.ByReference {
             }
 
@@ -61,13 +70,15 @@ public class KCBPCli {
 
         int KCBPCLI_GetVersion(Pointer hHandle, IntByReference pnVersion);
 
-        int KCBPCLI_SetConnectOption(Pointer hHandle, tagKCBPConnectOption stKCBPConnection);
+        int KCBPCLI_SetConnectOption(Pointer hHandle, tagKCBPConnectOption.ByValue stKCBPConnection);
+
+        int KCBPCLI_SetOption(Pointer hHandle, int nIndex, Pointer pValue);
 
         int KCBPCLI_GetConnectOption(Pointer hHandle, tagKCBPConnectOption stKCBPConnection);
 
         int KCBPCLI_ConnectServer(Pointer hHandle, String ServerName, String UserName, String Password);
 
-        int KCBPCLI_SQLConnect(Pointer hHandle, String ServerName, String UserName, String Password);
+        int KCBPCLI_SQLConnect(Pointer hHandle, String szServerName, String UserName, String Password);
 
         int KCBPCLI_DisConnect(Pointer hHandle);
 
@@ -83,35 +94,30 @@ public class KCBPCli {
 //        ret = CLibrary.INSTANCE.KCBPCLI_GetVersion(hHandle, pnVersion);
 //        System.out.println(ret);
 //        System.out.println(pnVersion.getValue());
-        CLibrary.tagKCBPConnectOption tagKCBPConnectOption = new CLibrary.tagKCBPConnectOption.ByValue();
+        CLibrary.tagKCBPConnectOption.ByValue tagKCBPConnectOption = new CLibrary.tagKCBPConnectOption.ByValue();
         tagKCBPConnectOption.write();
         tagKCBPConnectOption.szServerName = "KCBP1".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.nProtocal = 0;
-        tagKCBPConnectOption.szAddress = "7.72.174.32".getBytes(StandardCharsets.UTF_8);
-        tagKCBPConnectOption.nPort = 21000;
+        tagKCBPConnectOption.szAddress = "10.1.160.167".getBytes(StandardCharsets.UTF_8);
+        tagKCBPConnectOption.nPort = 21002;
         tagKCBPConnectOption.szSendQName = "req1".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.szReceiveQName = "ans1".getBytes(StandardCharsets.UTF_8);
         tagKCBPConnectOption.szReserved = "".getBytes(StandardCharsets.UTF_8);
+//        ret = CLibrary.INSTANCE.KCBPCLI_SetOption(hHandle,0, tagKCBPConnectOption.getPointer());
+        System.out.println("KCBPCLI_SetOption: " + ret);
         ret = CLibrary.INSTANCE.KCBPCLI_SetConnectOption(hHandle, tagKCBPConnectOption);
-        CLibrary.tagKCBPConnectOption tagKCBPConnectOptionByReference = new CLibrary.tagKCBPConnectOption();
+        CLibrary.tagKCBPConnectOption.ByReference tagKCBPConnectOptionByReference = new CLibrary.tagKCBPConnectOption.ByReference();
         ret = CLibrary.INSTANCE.KCBPCLI_GetConnectOption(hHandle, tagKCBPConnectOptionByReference);
-//        tagKCBPConnectOptionByReference.read();
         System.out.println("szServerName： " + new String(tagKCBPConnectOptionByReference.szServerName));
         System.out.println("nProtocal： " + tagKCBPConnectOptionByReference.nProtocal);
-        System.out.println("szAddress： " + new String(tagKCBPConnectOptionByReference.szAddress));
+        System.out.println("szAddress  " + new String(tagKCBPConnectOptionByReference.szAddress));
         System.out.println("nPort： " + tagKCBPConnectOptionByReference.nPort);
         System.out.println("szSendQName： " + new String(tagKCBPConnectOptionByReference.szSendQName));
         System.out.println("szReceiveQName： " + new String(tagKCBPConnectOptionByReference.szReceiveQName));
-        System.out.println(ret);
-//        开始连接
-        String ServerName = "KCBP1";
-        String UserName = "KCXP00";
-        String Password = "888888";
-
-        ret = CLibrary.INSTANCE.KCBPCLI_ConnectServer(hHandle, ServerName, UserName, Password);
+        ret = CLibrary.INSTANCE.KCBPCLI_ConnectServer(hHandle, "KCBP1", "KCXP00", "888888");
         System.out.println("KCBPCLI_ConnectServer: " + ret);
         ret = CLibrary.INSTANCE.KCBPCLI_DisConnect(hHandle);
         System.out.println("KCBPCLI_DisConnect: " + ret);
-
+//        System.out.println(Native.getLastError());
     }
 }
