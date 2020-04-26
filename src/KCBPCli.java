@@ -1,5 +1,3 @@
-package pers.ch.runner.business;
-
 import com.sun.jna.*;
 import com.sun.jna.ptr.*;
 
@@ -28,7 +26,7 @@ public class KCBPCli {
 
     public interface CLibrary extends Library {
 
-        CLibrary INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\pers.ch.runner.business.KCBPCli" : "c"), CLibrary.class);
+        CLibrary INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\KCBPCli" : "c"), CLibrary.class);
         int KCBP_SERVERNAME_MAX = 32;
         int KCBP_DESCRIPTION_MAX = 32;
 

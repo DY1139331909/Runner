@@ -45,7 +45,7 @@ public class KcbpNativeMethod {
      * @return "ok"为成功，其他为错误信息
      * @author wangbin
      */
-    public native String KCBPCLI_SQLConnect(String usename, String passwd);
+    public native boolean KCBPCLI_SQLConnect(String ServerName,String usename, String passwd);
 
 
     /**
