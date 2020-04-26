@@ -1,7 +1,11 @@
+import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
+import javax.lang.model.util.ElementScanner6;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -38,7 +42,43 @@ public class KCBPBusiness {
     }
 
     public int business(Map businessParameter) {
-        return 0;
+        ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_BeginWrite(hHandle);
+        if (ret == 0) {
+            Iterator<Map.Entry<String, String>> iterator = businessParameter.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> next = iterator.next();
+                String key = next.getKey();
+                String value = next.getValue();
+                ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_SetValue(hHandle, key, value);
+                if (ret != 0) {
+                    return ret;
+                }
+            }
+            ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_CallProgramAndCommit(hHandle, businessParameter.get("funcid").toString());
+            if (ret == 0) {
+//                调用成功
+                KCBPCli.KCBP.INSTANCE.KCBPCLI_RsOpen(hHandle);
+                if (ret == 0) {
+//                    打开结果集成功
+                    Pointer pszInfo = new Memory(1024);
+                    ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_RsGetColNames(hHandle, pszInfo, 1024);
+                    String colNames = pszInfo.getString(0);
+                    System.out.println(colNames);
+                    String[] colNamesArr = colNames.split(",");
+                    ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_RsFetchRow(hHandle);
+                    for (int i = 1; i <= colNamesArr.length; i++) {
+                        Pointer vlu = new Memory(256);
+                        ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_RsGetCol(hHandle, i, vlu);
+                        String vluStr = vlu.getString(0, "gbk");
+                        System.out.println(vluStr);
+                    }
+
+
+                }
+            }
+        }
+
+        return ret;
     }
 
     public int disConnect() {

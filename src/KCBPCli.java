@@ -69,6 +69,20 @@ public class KCBPCli {
 
         int KCBPCLI_BeginWrite(Pointer hHandle);
 
+        int KCBPCLI_SetValue(Pointer hHandle, String KeyName, String Vlu);
+
+        int KCBPCLI_CallProgramAndCommit(Pointer hHandle, String ProgramName);
+
+        int KCBPCLI_RsOpen(Pointer hHandle);
+
+        int KCBPCLI_RsGetColNames(Pointer hHandle, Pointer pszInfo, int nLen);
+
+        int KCBPCLI_RsGetCol(Pointer hHandle, int col, Pointer Vlu);
+
+        int KCBPCLI_RsFetchRow(Pointer hHandle);
+
+        int KCBPCLI_RsGetColByName(Pointer hHandle, String KeyName, Pointer Vlu);
+
 
     }
 }
