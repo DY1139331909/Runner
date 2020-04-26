@@ -1,16 +1,26 @@
+import sun.awt.geom.AreaOp;
+
 /**
  * Created by 程浩 on 2020/4/24
  */
 public class KcbpNativeMethod {
 
+    public static void main(String[] args) {
+        KcbpNativeMethod kcbpNativeMethod = new KcbpNativeMethod();
+        boolean ret = true;
+        ret = kcbpNativeMethod.KCBPCLI_Init("KCBP1",0,21002,"10.1.160.167","req1","ans1");
+        System.out.println(ret);
+    }
+
     static {
         try {
-            String path = ".\\dll\\kcbp\\";
-            System.load(path + "libidea1.dll");
+            String path = "C:\\Users\\chenghao3\\IdeaProjects\\Runner\\dll\\kcbp\\";
+            System.load(path + "KCBPPacketOpApi.dll");
+            System.load(path + "libeay64.dll");
             System.load(path + "kcbpcrypt.dll");
             System.load(path + "kcxpapi.dll");
             System.load(path + "KCBPCli.dll");
-            System.load(path + "KCBPMain.dll");
+            System.load(path + "KcbpNativeMethod.dll");
         } catch (Exception e) {
             System.out.println("错误信息 :" + e.getMessage());
         }
