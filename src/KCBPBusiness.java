@@ -105,6 +105,7 @@ public class KCBPBusiness {
     }
 
     public int disConnect() {
-        return 0;
+        ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_DisConnect(hHandle);
+        return ret;
     }
 }
