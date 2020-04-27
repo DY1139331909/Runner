@@ -83,6 +83,8 @@ public class KCBPCli {
 
         int KCBPCLI_RsGetColByName(Pointer hHandle, String KeyName, Pointer Vlu);
 
+        int KCBPCLI_RsMore(Pointer hHandle);
+
 
     }
 }
