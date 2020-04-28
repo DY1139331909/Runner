@@ -52,8 +52,25 @@ public class Listener {
                             for (Map.Entry<String, String> entry2 : jsonMap2.entrySet()) {
                                 System.out.println(entry2.getKey() + "" + entry2.getValue());
                             }
+
+                            HashMap<String, String> connectPar = new HashMap<String, String>();
+                            connectPar.put("szServerName", "KCBP1");
+                            connectPar.put("nProtocal", "0");
+                            connectPar.put("szAddress", "7.72.174.32");
+                            connectPar.put("nPort", "21000");
+                            connectPar.put("szSendQName", "req1");
+                            connectPar.put("szReceiveQName", "ans1");
+//        connectPar.put("szReserved","");
+                            connectPar.put("ServerName", "KCBP1");
+                            connectPar.put("UserName", "KCXP00");
+                            connectPar.put("Password", "888888");
+                            KCBPBusiness kcbpBusiness = new KCBPBusiness();
+                            int ret = kcbpBusiness.connect(connectPar);
+
+                            kcbpBusiness.business(jsonMap2);
+                            kcbpBusiness.disConnect();
+
                         }
-                        Run runner = new Run();
                     }
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
@@ -66,7 +83,7 @@ public class Listener {
     }
 
     public static void main(String[] args) {
-        String topic = "CASE";
+        String topic = "CASE2";
         String nameSrvAddr = "127.0.0.1:9876";
         Listener listener = new Listener();
         try {
@@ -74,5 +91,6 @@ public class Listener {
         } catch (MQClientException e) {
             e.printStackTrace();
         }
+
     }
 }
