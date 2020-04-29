@@ -13,8 +13,8 @@ public class KCBPBusinessTest {
         HashMap<String, String> connectPar = new HashMap<String, String>();
         connectPar.put("szServerName", "KCBP1");
         connectPar.put("nProtocal", "0");
-        connectPar.put("szAddress", "7.72.174.32");
-        connectPar.put("nPort", "21000");
+        connectPar.put("szAddress", "10.1.160.167");
+        connectPar.put("nPort", "21002");
         connectPar.put("szSendQName", "req1");
         connectPar.put("szReceiveQName", "ans1");
 //        connectPar.put("szReserved","");
