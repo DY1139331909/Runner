@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.parser.Feature;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author 程浩
@@ -16,23 +13,24 @@ import java.util.List;
 
 
 /*
-*测试用例数据存储
-*/
+ *测试用例数据存储
+ */
 
 public class CaseData {
-//    入参
-    public static List<HashMap<String,String>> caseDataInputArr = new ArrayList<>();
-//    出参
-    public static List<HashMap<String,String>> caseDataResArr = new ArrayList<>();
+    //    入参
+    public static LinkedHashMap<String, String> caseDataInput = new LinkedHashMap<>();
+    //    出参
+    public static LinkedHashMap<String, String> caseDataRes = new LinkedHashMap<>();
 
-    public void initCaseDataResArr(String caseDataInputStr){
-        JSONObject jsonObject = JSONArray.parseObject(caseDataInputStr, JSONObject.class, Feature.OrderedField);//将字符串转化成json对象
-        JSONObject jsonObject2 = JSONObject.parseObject(jsonObject.get("").toString(), JSONObject.class, Feature.OrderedField);
-        LinkedHashMap<String, String> jsonMap = JSON.parseObject(jsonObject2.toString(), new TypeReference<LinkedHashMap<String, String>>() {
+    public void initCaseDataResArr(String caseDataInputStr, String caseName) {
+        //将字符串转化成json对象
+        JSONObject temp = JSONArray.parseObject(caseDataInputStr, JSONObject.class, Feature.OrderedField);
+        JSONObject caseDataInputJson = JSONObject.parseObject(temp.get(caseName).toString(), JSONObject.class, Feature.OrderedField);
+        LinkedHashMap<String, String> caseDataInputMap = JSON.parseObject(caseDataInputJson.toString(), new TypeReference<LinkedHashMap<String, String>>() {
         }, Feature.OrderedField);
-
+        caseDataInput = caseDataInputMap;
+        caseDataRes = caseDataInputMap;
     }
-
 
 
 }
