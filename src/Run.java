@@ -16,10 +16,8 @@ public class Run {
 
     }
 
-//    获取队列消息并解析
-
-
-
-
-
+    public static void run(String caseData,String caseName){
+        CaseData data = new CaseData();
+        data.initCaseDataInput(caseData,caseName);
+    }
 }

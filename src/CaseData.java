@@ -62,7 +62,18 @@ public class CaseData {
      * @return
      */
     public String getCaseDataInput(String comp,String key){
-        return caseDataInput.get(comp).get(key)[0];
+        String[] valueArr = caseDataInput.get(comp).get(key);
+        if (valueArr[0].equals("0")){
+            return valueArr[1];
+        }else {
+            String compRes = valueArr[0].split(".")[0];
+            String paraRes = valueArr[0].split(".")[1];
+            return caseDataRes.get(compRes).get(paraRes)[0];
+        }
+    }
+
+    public String getCompName(){
+        return "";
     }
 
     public static void main(String[] args) {
