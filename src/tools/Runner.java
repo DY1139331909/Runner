@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ar {
+public class Runner {
     /**
      * @param sqlType  数据库类型
      * @param ip       数据库地址
