@@ -1,0 +1,6 @@
+System.out.println("running");
+int sum(i){
+    System.out.println(i);
+    return 0;
+}
+sum(1);

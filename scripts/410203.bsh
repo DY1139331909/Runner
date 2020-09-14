@@ -1,0 +1,210 @@
+source("./publicFunction.bsh");
+source("./QP_func.bsh");
+java.util.Map dataMap = getData();
+dataMap.put("custid",ar.parameterData.getFrom("custid"));
+dataMap.put("custorgid",ar.parameterData.getFrom("custorgid"));
+dataMap.put("trdpwd",ar.parameterData.getFrom("trdpwd"));
+dataMap.put("netaddr",ar.parameterData.getFrom("netaddr"));
+dataMap.put("orgid",ar.parameterData.getFrom("orgid"));
+dataMap.put("operway",ar.parameterData.getFrom("operway"));
+dataMap.put("ext",ar.parameterData.getFrom("ext"));
+dataMap.put("funcid",ar.parameterData.getFrom("funcid"));
+dataMap.put("market",ar.parameterData.getFrom("market"));
+dataMap.put("stklevel",ar.parameterData.getFrom("stklevel"));
+dataMap.put("stkcode",ar.parameterData.getFrom("stkcode"));
+dataMap.put("poststr",ar.parameterData.getFrom("poststr"));
+dataMap.put("rowcount",ar.parameterData.getFrom("rowcount"));
+dataMap.put("stktype",ar.parameterData.getFrom("stktype"));
+dataMap.put("zxjt_trade_type",ar.parameterData.getFrom("zxjt_trade_type"));
+dataMap.put("zxjt_yq_qty",ar.parameterData.getFrom("zxjt_yq_qty"));
+dataMap.put("zxjt_price_type",ar.parameterData.getFrom("zxjt_price_type"));
+dataMap.put("zxjt_yq_price",ar.parameterData.getFrom("zxjt_yq_price"));
+dataMap.put("zxjt_yq_orderfrzamt",ar.parameterData.getFrom("zxjt_yq_orderfrzamt"));
+dataMap.put("zxjt_orderfrztype",ar.parameterData.getFrom("zxjt_orderfrztype"));
+dataMap.put("zxjt_bsflag",ar.parameterData.getFrom("zxjt_bsflag"));
+dataMap.put("zxjt_yq_stkcode",ar.parameterData.getFrom("zxjt_yq_stkcode"));
+dataMap.put("poststr_out",ar.parameterData.getFrom("poststr_out"));
+dataMap.put("market_out",ar.parameterData.getFrom("market_out"));
+dataMap.put("moneytype",ar.parameterData.getFrom("moneytype"));
+dataMap.put("stkname",ar.parameterData.getFrom("stkname"));
+dataMap.put("stkcode_out",ar.parameterData.getFrom("stkcode_out"));
+dataMap.put("stktype_out",ar.parameterData.getFrom("stktype_out"));
+dataMap.put("priceunit",ar.parameterData.getFrom("priceunit"));
+dataMap.put("maxrisevalue",ar.parameterData.getFrom("maxrisevalue"));
+dataMap.put("maxdownvalue",ar.parameterData.getFrom("maxdownvalue"));
+dataMap.put("stopflag",ar.parameterData.getFrom("stopflag"));
+dataMap.put("mtkcalflag",ar.parameterData.getFrom("mtkcalflag"));
+dataMap.put("bondintr",ar.parameterData.getFrom("bondintr"));
+dataMap.put("maxqty",ar.parameterData.getFrom("maxqty"));
+dataMap.put("minqty",ar.parameterData.getFrom("minqty"));
+dataMap.put("buyunit",ar.parameterData.getFrom("buyunit"));
+dataMap.put("saleunit",ar.parameterData.getFrom("saleunit"));
+dataMap.put("stkstatus",ar.parameterData.getFrom("stkstatus"));
+dataMap.put("stklevel_out",ar.parameterData.getFrom("stklevel_out"));
+dataMap.put("trdid",ar.parameterData.getFrom("trdid"));
+dataMap.put("quitdate",ar.parameterData.getFrom("quitdate"));
+dataMap.put("fixprice",ar.parameterData.getFrom("fixprice"));
+dataMap.put("priceflag",ar.parameterData.getFrom("priceflag"));
+dataMap.put("memotext",ar.parameterData.getFrom("memotext"));
+dataMap.put("tc_flag",ar.parameterData.getFrom("tc_flag"));
+dataMap.put("tc_checkStr",ar.parameterData.getFrom("tc_checkStr"));
+dataMap.put("tc_allowerror",ar.parameterData.getFrom("tc_allowerror"));
+dataMap.put("tc_result",ar.parameterData.getFrom("tc_result"));
+com.spasvo.kcbp.KCBPBusiness.getInstance().fundQueryBusiness(dataMap);
+returnData(dataMap);
+if(dataMap.get("resultstate").equals("1")){throw new Exception("") ;}
+//如果是zxjt_price_type为空，取价格平均值
+String zxjt_price_type=ar.parameterData.getFrom("zxjt_price_type");
+String stkcode = ar.parameterData.getFrom("stkcode");
+String market = ar.parameterData.getFrom("market");
+int qty;
+double maxrisevalue=Double.parseDouble(ar.parameterData.getFrom("maxrisevalue"));
+double maxdownvalue=Double.parseDouble(ar.parameterData.getFrom("maxdownvalue"));
+double yqPrice;
+double lastprice;
+String orderfrztype=ar.parameterData.getFrom("zxjt_orderfrztype");
+String bsflag=ar.parameterData.getFrom("zxjt_bsflag");
+
+if(zxjt_price_type.equals(""))
+{
+   yqPrice =ArithUtilR.div(ArithUtilR.add(maxrisevalue,maxdownvalue),2);
+   yqPrice =Double.parseDouble(calcuteRate(yqPrice));
+}
+else if(zxjt_price_type.equals("rise"))
+{
+   yqPrice=maxrisevalue;
+   switch (orderfrztype){
+	case "100per_0B_T_1":
+	case "100per_0B_T_0":
+	case "100perRZ":
+	case "100perRZ_T_0":
+	case "MQHQ_fundavl_part_100per_0B":
+	case "MQHQ_fundavl_part":
+    // case "QGND_RZ":
+        if (!bsflag.equals("0B")&&!bsflag.equals("0S")&&!bsflag.equals("")){
+	         yqPrice=StrToDou(Curret_Match_Pric(market,stkcode));
+	    }
+    }
+}
+else if(zxjt_price_type.equals("down"))
+{
+   yqPrice =maxdownvalue;
+   switch (orderfrztype){
+    case "MQHK_part_creditstkcode_feibenquan_sysdate":
+	case "100per_0B_T_1":
+	case "100per_0S":
+	case "DBP0S_part_sysdate"://市价担保品卖出：偿还负债-部分偿还（自有股份）+普通偿还顺序
+	case "DBP0S_part_prior"://市价担保品卖出：偿还负债-部分偿还（融资买入股份）
+	case "DBP0S_all_null"://市价担保品卖出：偿还负债-全部偿还（融资卖出股份）（其中负债包含本券与非本券）
+        if (!bsflag.equals("0B")&&!bsflag.equals("0S")&&!bsflag.equals("")){
+	         yqPrice=StrToDou(Curret_Match_Pric(market,stkcode));
+	    }
+    }
+}
+else if(zxjt_price_type.equals("rise_zstc"))//融资专属头寸-信用开仓-市价价格取值--优化时修改TC数据库值，涉及用例120条。
+{
+    yqPrice=StrToDou(Curret_Match_Pric(market,stkcode));
+}
+else if(zxjt_price_type.equals("riseup"))
+{
+   yqPrice =ArithUtilR.add(maxrisevalue,0.01);
+}
+else if(zxjt_price_type.equals("downlow"))
+{
+   yqPrice =ArithUtilR.sub(maxdownvalue,0.01);
+}
+else if(zxjt_price_type.equals("price0.001"))
+{
+   yqPrice = (maxrisevalue+maxdownvalue)/2;
+   yqPrice = (int)(yqPrice*100)/100.0;
+   yqPrice=ArithUtilR.add_bon(yqPrice,0.001);
+}
+else if(zxjt_price_type.equals("price0.0001"))
+{
+   yqPrice = (maxrisevalue+maxdownvalue)/2;
+   yqPrice = (int)(yqPrice*100)/100.0;
+   yqPrice=ArithUtilR.add_bon(yqPrice,0.0001);
+}
+else if(zxjt_price_type.equals("lastprice")){
+    String[][] contentArr=ar.getDatabase("SQL Server", tc_rzrq_jkblIP,DBUser,DBPassword,"select lastprice, closeprice from run..stkprice where stkcode = \'"+stkcode+"\'");
+    lastprice = StrToDou(contentArr[0][0]);
+    if (lastprice == 0) {
+        lastprice = StrToDou(contentArr[0][1]);
+    }
+    yqPrice = ArithUtilR.add(lastprice,0.01);
+}
+else if(zxjt_price_type.equals("lastpricedown")){
+    String[][] contentArr=ar.getDatabase("SQL Server", tc_rzrq_jkblIP,DBUser,DBPassword,"select lastprice, closeprice from run..stkprice where stkcode = \'"+stkcode+"\'");
+    lastprice = StrToDou(contentArr[0][0]);
+    if (lastprice == 0) {
+        lastprice = StrToDou(contentArr[0][1]);
+    }
+    yqPrice = ArithUtilR.sub(lastprice,0.01);
+}
+else
+{
+    yqPrice =Double.parseDouble(ar.parameterData.getFrom("zxjt_price_type"));
+
+}
+ar.parameterData.putInto("zxjt_yq_price",yqPrice.toString());
+
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").equals("5000/price+100"))
+{
+    qty =(int)(ArithUtilR.div(50,yqPrice))*100+100;
+ar.parameterData.putInto("zxjt_yq_qty",qty.toString());
+}
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").equals("1000000.00/price+100"))
+{
+    qty =(int)(ArithUtilR.div(10000.00,yqPrice))*100+100;
+ar.parameterData.putInto("zxjt_yq_qty",qty.toString());
+}
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").equals("3000000.00/price+100"))
+{
+    qty =(int)(ArithUtilR.div(30000.00,yqPrice))*100+100;
+ar.parameterData.putInto("zxjt_yq_qty",qty.toString());
+}
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").contains("pledgerateoff")||ar.parameterData.getFrom("zxjt_yq_orderfrzamt").contains("rzmarginrateoff")){//个性化担保折算率折扣//个性化保证金比例折扣
+double marginratefund =Double.parseDouble(ar.parameterData.getFrom("marginratefund"));
+double marginratestk =Double.parseDouble(ar.parameterData.getFrom("marginratestk"));
+double pledgerate =Double.parseDouble(ar.parameterData.getFrom("pledgerate"));
+double pledgerateoff =StrToDou(ar.parameterData.getFrom("pledgerateoff"));
+double rzmarginrateoff =StrToDou(ar.parameterData.getFrom("rzmarginrateoff"));
+double fundavl =Double.parseDouble(ar.parameterData.getFrom("fundavl"));
+double stkavl =Double.parseDouble(ar.parameterData.getFrom("stkavl"));
+double lastprice =Double.parseDouble(ar.parameterData.getFrom("lastprice"));
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").equals("pledgerateoffRZ"))//个性化担保折算率折扣
+{
+
+/*
+marginratefund			E	融资保证金比例
+marginratestk			E	融券保证金比例
+pledgerate			E	折算率
+pledgerateoff 			E	个性化担保折算率折扣
+rzmarginrateoff			E	个性化保证金比例折扣
+fundavl			E	资金可用
+stkavl			E	股份可用
+lastprice			E	最新成交价
+●担保折算率为0.65 a，融资保证金比例为1 b，融券保证金比例为0.75 c
+qty=avlamt/price
+avlamt=保证金可用/b
+保证金可用=资金可用+证券市值*a
+证券市值=股份可用*最新成交价
+可融资额度=保证金/
+*/
+qty=(int)((ArithUtilR.div(ArithUtilR.div(ArithUtilR.add(fundavl,ArithUtilR.mul(ArithUtilR.mul(stkavl,lastprice),ArithUtilR.mul(pledgerate,pledgerateoff))),marginratefund),yqPrice))/100)*100;
+}
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").equals("rzmarginrateoffRZ")) //个性化保证金比例折扣
+{
+qty=(int)(ArithUtilR.div(ArithUtilR.div(ArithUtilR.add(fundavl,ArithUtilR.mul(ArithUtilR.mul(stkavl,lastprice),pledgerate)),ArithUtilR.mul(marginratefund,rzmarginrateoff)),yqPrice)/100)*100;
+
+}
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").equals("pledgerateoffRQ")) //个性化担保折算率折扣
+{
+qty=(int)(ArithUtilR.div(ArithUtilR.div(ArithUtilR.add(fundavl,ArithUtilR.mul(ArithUtilR.mul(stkavl,lastprice),pledgerate)),ArithUtilR.mul(marginratestk,rzmarginrateoff)),yqPrice)/100)*100;
+}
+if(ar.parameterData.getFrom("zxjt_yq_orderfrzamt").equals("rzmarginrateoffRQ")) //个性化保证金比例折扣
+{
+qty=(int)(ArithUtilR.div(ArithUtilR.div(ArithUtilR.add(fundavl,ArithUtilR.mul(ArithUtilR.mul(stkavl,lastprice),pledgerate)),ArithUtilR.mul(marginratestk,rzmarginrateoff)),yqPrice)/100)*100;
+}
+ar.parameterData.putInto("zxjt_yq_qty",qty.toString());
+}

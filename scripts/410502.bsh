@@ -1,0 +1,539 @@
+source("./QP_func.bsh");
+source("./publicFunction.bsh");
+java.util.Map dataMap = getData();
+dataMap.put("custid",ar.parameterData.getFrom("custid"));
+dataMap.put("custorgid",ar.parameterData.getFrom("custorgid"));
+dataMap.put("trdpwd",ar.parameterData.getFrom("trdpwd"));
+dataMap.put("netaddr",ar.parameterData.getFrom("netaddr"));
+dataMap.put("orgid",ar.parameterData.getFrom("orgid"));
+dataMap.put("operway",ar.parameterData.getFrom("operway"));
+dataMap.put("ext",ar.parameterData.getFrom("ext"));
+dataMap.put("funcid",ar.parameterData.getFrom("funcid"));
+dataMap.put("fundid",ar.parameterData.getFrom("fundid"));
+dataMap.put("moneytype",ar.parameterData.getFrom("moneytype"));
+dataMap.put("remark",ar.parameterData.getFrom("remark"));
+dataMap.put("zxjt_orderfrztype",ar.parameterData.getFrom("zxjt_orderfrztype"));
+dataMap.put("zxjt_usetype",ar.parameterData.getFrom("zxjt_usetype"));
+dataMap.put("zxjt_trade_type",ar.parameterData.getFrom("zxjt_trade_type"));
+dataMap.put("zxjt_yq_qty",ar.parameterData.getFrom("zxjt_yq_qty"));
+dataMap.put("zxjt_yq_price",ar.parameterData.getFrom("zxjt_yq_price"));
+dataMap.put("zxjt_pre_fundbal",ar.parameterData.getFrom("zxjt_pre_fundbal"));
+dataMap.put("zxjt_pre_fundavl",ar.parameterData.getFrom("zxjt_pre_fundavl"));
+dataMap.put("zxjt_pre_fund",ar.parameterData.getFrom("zxjt_pre_fund"));
+dataMap.put("zxjt_yq_orderfrzamt",ar.parameterData.getFrom("zxjt_yq_orderfrzamt"));
+dataMap.put("zxjt_stkcode",ar.parameterData.getFrom("zxjt_stkcode"));
+ar.sleep((int)StrToDou(ar.parameterData.getFrom("zxjt_ar_sleep")));
+dataMap.put("custid_out",ar.parameterData.getFrom("custid_out"));
+dataMap.put("fundid_out",ar.parameterData.getFrom("fundid_out"));
+dataMap.put("orgid_out",ar.parameterData.getFrom("orgid_out"));
+dataMap.put("moneytype_out",ar.parameterData.getFrom("moneytype_out"));
+dataMap.put("fundbal",ar.parameterData.getFrom("fundbal"));
+dataMap.put("fundavl",ar.parameterData.getFrom("fundavl"));
+dataMap.put("marketvalue",ar.parameterData.getFrom("marketvalue"));
+dataMap.put("fund",ar.parameterData.getFrom("fund"));
+dataMap.put("stkvalue",ar.parameterData.getFrom("stkvalue"));
+dataMap.put("fundseq",ar.parameterData.getFrom("fundseq"));
+dataMap.put("fundloan",ar.parameterData.getFrom("fundloan"));
+dataMap.put("fundbuy",ar.parameterData.getFrom("fundbuy"));
+dataMap.put("fundsale",ar.parameterData.getFrom("fundsale"));
+dataMap.put("fundfrz",ar.parameterData.getFrom("fundfrz"));
+dataMap.put("fundlastbal",ar.parameterData.getFrom("fundlastbal"));
+dataMap.put("creditbal",ar.parameterData.getFrom("creditbal"));
+dataMap.put("creditavl",ar.parameterData.getFrom("creditavl"));
+dataMap.put("tc_allowerror",ar.parameterData.getFrom("tc_allowerror"));
+dataMap.put("tc_result",ar.parameterData.getFrom("tc_result"));
+com.spasvo.kcbp.KCBPBusiness.getInstance().fundQueryBusiness(dataMap);
+returnData(dataMap);
+if(dataMap.get("resultstate").equals("1")){throw new Exception("") ;}
+
+String bsflag=ar.parameterData.getFrom("bsflag");
+String wtcjflag=ar.parameterData.getFrom("zxjt_wt_cj_flag");
+String market=ar.parameterData.getFrom("market");
+String stkcode=ar.parameterData.getFrom("zxjt_stkcode");
+String usetype=ar.parameterData.getFrom("zxjt_usetype"); // 调用组件状态   委托前- beforeorder   委托后-afterorder    撤单后-cancelorder
+double prefundavl = StrToDou(ar.parameterData.getFrom("zxjt_pre_fundavl")); //可用资金
+double lastfundavl = Double.parseDouble(ar.parameterData.getFrom("fundavl")); //可用资金
+double fundavlChange=ArithUtilR.sub(prefundavl,lastfundavl);  //委托前的可用资金-委托后的可用资金
+String tradetype=ar.parameterData.getFrom("zxjt_trade_type");
+String orderfrztype=ar.parameterData.getFrom("zxjt_orderfrztype");
+switch (orderfrztype){
+	case "50per_0B_T_1":
+	case "50per_0B_T_0":
+	case "50per_0S":
+	case "MQHQ_fundavl_part_50per_0B_T_1"://市价卖券还券
+	    double order_price=StrToDou(ar.parameterData.getFrom("zxjt_yq_price"));
+	    double price=StrToDou(Curret_Match_Pric(market,stkcode));
+	    if (stkcode.startsWith("688")){
+	       price=order_price;
+	    }
+	    double qty=StrToDou(ar.parameterData.getFrom("zxjt_yq_qty"));
+	    boolean check1=true,check2=true,check3=true;
+	    qty=Current_order_Qty(orderfrztype,usetype,bsflag,wtcjflag,qty);
+	    switch (bsflag){//限价条件下，成交价只能为委托价
+	    	case "0B":
+	    	case "0S":
+	             price=order_price;
+	    }
+	    double bondintr =StrToDou(ar.parameterData.getFrom("zxjt_bondintr"));	//债券利息
+        price=ArithUtilR.add_bon(price,bondintr);
+	    order_price=ArithUtilR.add_bon(order_price,bondintr);
+	    double orderfrzamt =amtAddFraz(qty,order_price,price,tradetype,orderfrztype,bsflag,usetype);
+	    if(orderfrztype.equals("MQHQ_fundavl_part_50per_0B_T_1")){//市价买券还券（对方、本方、转限）-部分成交后未成交部分按委托价冻结
+	        switch (bsflag){
+	    	case "0a":
+	    	case "0b":
+	    	case "0q":
+	    	orderfrzamt =amtAddFraz(qty,order_price,price,tradetype,orderfrztype,"0B",usetype);
+	    	}
+	    }
+	    if (orderfrztype.equals("50per_0S")){//卖出时增加
+	        orderfrzamt=-orderfrzamt;
+	    }
+	    check1 = setCheckPoint("fundavl_check", Double.parseDouble(calcuteRate(orderfrzamt)),fundavlChange, "=");
+	    if (!check1 || !check2 || !check3) {
+            throw new Exception("校验失败");
+        }
+	    return;//终止
+	case "100per_0B_T_0":
+	case "100per_0S":
+	switch(bsflag){
+	    case "0a":
+	    case "0b":
+	    case "0q":
+	    case "0c":
+	    case "0d":
+	    case "0e":
+	    case "0f":
+	    case "0g":
+	    case "0r":
+	    case "0h":
+	    case "0i":
+	    case "0j":
+	        double price=StrToDou(Curret_Match_Pric(market,stkcode));
+	        double qty=StrToDou(ar.parameterData.getFrom("zxjt_yq_qty"));
+	        boolean check1=true;
+	        double orderfrzamt=amtFrazFee(qty,price,price,orderfrztype,tradetype);//委托后冻结
+	        if (orderfrztype.equals("100per_0S")){
+	            orderfrzamt=-orderfrzamt;
+				System.out.println("thisis20200806:  "+orderfrzamt);
+	        }
+	        check1 = setCheckPoint("fundavl_check", orderfrzamt,fundavlChange, "=");
+	        if (!check1 ) {
+                throw new Exception("校验失败");
+            }
+            return;
+	}
+	case "daibao_B"://已报状态市价即时、五档、全额买
+
+	    switch(bsflag){
+	    case "0c":
+	    case "0d":
+	    case "0e":
+
+	        double orderfrzamt=0;
+	        boolean check1 = true;
+		    check1 = setCheckPoint("fundavl_check", orderfrzamt,fundavlChange, "=");
+	        if (!check1) {
+                throw new Exception("校验失败");
+            }
+            return;
+	    }
+	case "MQHK_all_stkcode_feibenquan":
+	if (orderfrztype.equals("MQHK_all_stkcode_feibenquan"))
+	    {switch (bsflag){
+
+		case "0S":
+		    boolean check1=true,check2=true;
+		    double price=StrToDou(ar.parameterData.getFrom("zxjt_yq_price"));
+		    double qty=StrToDou(ar.parameterData.getFrom("zxjt_yq_qty"));
+		    double orderfrzamt=amtFrazFee(qty,price,price,orderfrztype,tradetype);
+		    double zxjt_yq_orderfrzamt=StrToDou(ar.parameterData.getFrom("zxjt_yq_orderfrzamt_fundavl"));
+		    double fund_alt=ArithUtil.sub(zxjt_yq_orderfrzamt,orderfrzamt);
+		    check1 = setCheckPoint("fundavl_check", fund_alt,fundavlChange, "=");
+		    check2=setCheckPoint("fundbal_check",ar.parameterData.getFrom("zxjt_pre_fundbal"),ar.parameterData.getFrom("fundbal"));
+		    if (!check1||!check2) {
+			    System.out.println("thisis2020080611:  "+orderfrzamt+" orderfrztype11 "+orderfrztype);
+                throw new Exception("校验失败");
+            }
+            return;
+		}}
+	default:
+	    System.out.println("otherway_go");
+}
+System.out.print("thisisme:"+1);
+double creditavlChange;
+double orderfrzamtCreditavl;
+String usetype=ar.parameterData.getFrom("zxjt_usetype"); // 调用组件状态   委托前- beforeorder   委托后-afterorder    撤单后-cancelorder
+if(usetype.equals("beforeorder")||usetype.equals("")){}   //||usetype.equals("null")
+else{
+	String orderfrztype=ar.parameterData.getFrom("zxjt_orderfrztype");  //zxjt_orderfrztype,冻结类型，委托成交： //为空时表示委托
+    boolean check1=true,check2=true,check3=true,check4=true;
+    double prefundavl = StrToDou(ar.parameterData.getFrom("zxjt_pre_fundavl")); //可用资金
+    double lastfundavl = Double.parseDouble(ar.parameterData.getFrom("fundavl")); //可用资金
+    double fundavlChange=ArithUtilR.sub(prefundavl,lastfundavl);  //委托前的可用资金-委托后的可用资金
+    double qty=StrToDou(ar.parameterData.getFrom("zxjt_yq_qty"));
+    double price=StrToDou(ar.parameterData.getFrom("zxjt_yq_price"));
+	if (orderfrztype.equals("MQHQ_fundavl_all")){
+
+	}
+	switch (orderfrztype){
+	case "QGND_DBP0B"://全功能点买
+	case "QGND_DBP0S"://全功能点卖
+	case "DBP0S_null"://担保品卖出
+	case "MQHQ_fundavl_all"://买券还券/全部偿还,自有资金
+	case "MQHQ_creditfundavl_all"://买券还券/全部偿还,融券卖出资金
+	case "MQHQ_creditfundavl_fundavl_all"://买券还券/全部偿还,融券卖出资金+自有资金
+	case "MQHQ_fundavl_part"://买券还券，部分偿还
+	case "MQHQ_creditfundavl_part"://部分偿还，融券卖出资金
+	case "MQHQ_fundavl_all_part_sysdate"://部分偿还，自有资金
+	case "MQHQ_creditfundavl_all_part_prior"://部分偿还，融券卖出资金，自定义偿还顺序
+	case "QGND_MQHQ_fundavl_part"://市价全功能点校验
+	case "MQHQ_fundavl_part_more"://多比委托，自有资金
+	    switch (bsflag){
+	    case "0a":
+	    case "0b":
+	    case "0q":
+	    case "0c":
+	    case "0d":
+	    case "0e":
+	    case "0f":
+	    case "0g":
+	    case "0r":
+	    case "0h":
+	    case "0i":
+	    case "0j":
+	        price=StrToDou(Curret_Match_Pric(market,stkcode));
+	        System.out.println("thisis20200604"+stkcode+price);
+			if (stkcode.startsWith("688")){
+	            price=StrToDou(ar.parameterData.getFrom("zxjt_yq_price"));;
+	    }
+	    }
+	}
+	 System.out.println("thisis20200609"+"stkcode"+stkcode+"price"+price);
+    double bondintr =StrToDou(ar.parameterData.getFrom("zxjt_bondintr"));	//债券利息
+    price=ArithUtilR.add_bon(price,bondintr);
+    String tradetype=ar.parameterData.getFrom("zxjt_trade_type");
+    double matchamt=ArithUtilR.mul(qty,price);  //成交金额
+    double orderfrzamt =amtAddSubFee(qty,price,tradetype,orderfrztype);
+    double creditavlamt;
+    double precreditavl = StrToDou(ar.parameterData.getFrom("zxjt_pre_creditavl"));	//信用资金可用
+    double lastcreditavl = StrToDou(ar.parameterData.getFrom("creditavl"));	//信用资金可用
+    creditavlChange=ArithUtilR.sub(lastcreditavl,precreditavl);
+    if(usetype.equals("afterorder")){	//级别1
+		//tradetype
+	//担保品买入
+	//深A 不收过户费、印花税
+	//沪A 收过户费，0.00002 （按金额）
+	//担保品卖出
+	//深A 收印花税 0.001
+	//沪A 收印花税 0.001，过户费 0.00002（按金额）
+	// tradetype   沪A买
+	// tradetype   深A卖
+	// tradetype   沪A卖
+
+	// tradetype    IPOPS(IPO配售)  IPOSG(申购)   (新增)
+		if(orderfrztype.equals("zuhe_RZ0B_T+1")){
+			//
+			orderfrzamt = 0;
+			double creditavl = StrToDou(ar.parameterData.getFrom("creditavl"));
+			double precreditavl = StrToDou(ar.parameterData.getFrom("zxjt_pre_creditavl"));
+			double changecreditavl = ArithUtilR.sub(creditavl,precreditavl);
+			check1 = setCheckPoint("creditavl_check", orderfrzamt, changecreditavl, "=");
+
+        }
+		if(orderfrztype.equals("zuhe_RQ0S")){
+			//
+			orderfrzamt = 0;
+			double creditbal = StrToDou(ar.parameterData.getFrom("creditbal"));
+			double precreditbal = StrToDou(ar.parameterData.getFrom("zxjt_pre_creditbal"));
+			double changecreditbal = ArithUtilR.sub(creditbal,precreditbal);
+			check1 = setCheckPoint("creditbal_check", orderfrzamt, changecreditbal, "=");
+        }
+		if(orderfrztype.equals("zuhe_XQHQ")){
+			String fundid=ar.parameterData.getFrom("fundid");
+			String stkcode=ar.parameterData.getFrom("zxjt_stkcode");
+			String[][] contentArr=ar.getDatabase("SQL Server", tc_rzrq_jkblIP,DBUser,DBPassword,"select stkcode,clearamt,matchqty,stkrepayunfrz from run..creditdebts where fundid = \'"+fundid+"\' and orderid like '%RQ%'");
+			System.out.println("contentArr+++++++++++++++++++++++++++++"+contentArr[1][1]);
+			double creditavlhold = 0;
+			for(i=0;i<=1;i++){
+				String con_stkcode = contentArr[i][0];
+				System.out.println("con_stkcode+++++++++++++++++++++++++++++"+contentArr[i][0]);
+				double clearamt = StrToDou(contentArr[i][1]);
+				System.out.println("clearamt+++++++++++++++++++++++++++++"+contentArr[i][1]);
+				double matchqty = StrToDou(contentArr[i][2]);
+				System.out.println("matchqty+++++++++++++++++++++++++++++"+contentArr[i][2]);
+				double stkrepayunfrz = StrToDou(contentArr[i][3]);
+				System.out.println("stkrepayunfrz+++++++++++++++++++++++++++++"+contentArr[i][3]);
+				qty = stkrepayunfrz;
+				if(con_stkcode.equals(stkcode)){
+					qty = StrToDou(ar.parameterData.getFrom("zxjt_yq_qty"));
+				}
+				System.out.println("qty+++++++++++++++++++++++++++++"+qty);
+				creditavlhold = ArithUtilR.add(ArithUtilR.mul(ArithUtilR.div(ArithUtilR.sub(matchqty,qty),matchqty),clearamt),creditavlhold);
+				System.out.println("creditavlhold+++++++++++++++++++++++++++++"+creditavlhold);
+			}
+			double creditavl = StrToDou(ar.parameterData.getFrom("creditavl"));
+			double precreditavl = StrToDou(ar.parameterData.getFrom("zxjt_pre_creditavl"));
+			double changecreditavl = ArithUtilR.sub(precreditavl,creditavl);
+			//(合约matchqty-偿还数量)/合约matchqty*合约clearamt)   应保留融券卖出资金creditbalhold
+			//(合约clearamt-(合约matchqty-偿还数量)/合约matchqty*合约clearamt)
+			double precreditavl = StrToDou(ar.parameterData.getFrom("zxjt_pre_creditavl"));
+			if(precreditavl>creditavlhold){
+				orderfrzamt = ArithUtilR.sub(precreditavl,creditavlhold);
+				fundavlChange = - fundavlChange;
+			}
+			else{
+				orderfrzamt = 0;
+			}
+			check1 = setCheckPoint("creditavl_check", orderfrzamt, changecreditavl, "=");
+			check2 = setCheckPoint("fundavl_check", orderfrzamt, fundavlChange, "=");
+        }
+		if(orderfrztype.equals("zuhe_MQHQ")||orderfrztype.equals("zuhe_DB0BHE")){
+			double yqchange=0;
+			double creditavl = StrToDou(ar.parameterData.getFrom("creditavl"));
+			double precreditavl = StrToDou(ar.parameterData.getFrom("zxjt_pre_creditavl"));
+			double changecreditavl = ArithUtilR.sub(precreditavl,creditavl);
+			double orderfrzamt =amtAddSubFee(qty,price,tradetype,orderfrztype);
+			if(precreditavl<=orderfrzamt)
+			{
+				yqchange = ArithUtilR.sub(orderfrzamt,precreditavl);
+				orderfrzamt = precreditavl;
+			}
+			else
+			{
+				yqchange = 0;
+			}
+			check1 = setCheckPoint("creditavl_check", orderfrzamt, changecreditavl, "=");
+			check2 = setCheckPoint("fundavl_check", yqchange, fundavlChange, "=");
+		}
+		if(orderfrztype.equals("zuhe_DBZC")){
+			double yqchange=0;
+			check1 = setCheckPoint("fundavl_check", yqchange, fundavlChange, "=");
+		}
+        if(orderfrztype.equals("DBP0B_YCCD_HB")||orderfrztype.equals("DBP0B_YBCD_HB")){	//担保品买入货币ETF
+            orderfrzamt=ArithUtilR.sub(orderfrzamt,precreditavl);
+            if(orderfrzamt<0){
+                orderfrzamt=0;
+            }
+        }
+        //if(orderfrztype.equals("DBP0S_YCCD_HB")){}
+        //if(orderrec.clearamt>(本券对应未还融资利息+本券对应未还融资本金),orderrec.clearamt-(本券对应未还融资利息+本券对应未还融资本金),0)
+        if(orderfrztype.contains("0S")||orderfrztype.contains("MQHK")||orderfrztype.contains("XQHQ")) {
+            fundavlChange=-fundavlChange;
+        }
+        if(orderfrztype.contains("MQHK_all")||orderfrztype.contains("MQHK_part")||orderfrztype.contains("YHK")||orderfrztype.equals("RZZSTC_DBP0S_all_creditstkcode")){
+            orderfrzamt= Double.parseDouble(ar.parameterData.getFrom("zxjt_yq_orderfrzamt_fundavl")); // 合约值传递过来的资金变化值
+			 if (orderfrztype.equals("MQHK_all_stkcode_feibenquan")&&!bsflag.equals("0B")&&!bsflag.equals("0S")&&!bsflag.equals("")){//卖券还款，非本券
+			 price=StrToDou(Curret_Match_Pric(market,stkcode));  //取市价成交价;
+			double fundaa=amtSubfee(qty,price,tradetype);
+			orderfrzamt=ArithUtilR.sub(fundaa,orderfrzamt);
+			}
+			System.out.println("orderfrzamtis:"+orderfrzamt);
+            check2=setCheckPoint("fundbal_check",ar.parameterData.getFrom("zxjt_pre_fundbal"),ar.parameterData.getFrom("fundbal"));
+            //		double prefundbal = Double.parseDouble(ar.parameterData.getFrom("zxjt_pre_fundbal")); //可用资金
+            //		double lastfundbal = Double.parseDouble(ar.parameterData.getFrom("fundbal")); //可用资金
+            //		check3=setCheckPoint("fundbal_check",prefundbal,lastfundbal,"=");
+        }
+        if(orderfrztype.equals("DBP0S_all_null")){
+            double fundavl = Double.parseDouble(ar.parameterData.getFrom("zxjt_yq_orderfrzamt_fundavl")); //合约值传递过来的资金变化值
+            orderfrzamt=ArithUtilR.sub(orderfrzamt,fundavl);
+        }
+
+        if(orderfrztype.contains("perRQ_0S")){  //50perRQ_0S  100perRQ_0S
+            double precreditavl = Double.parseDouble(ar.parameterData.getFrom("zxjt_pre_creditavl"));	//信用资金可用
+            double lastcreditavl = Double.parseDouble(ar.parameterData.getFrom("creditavl"));	//信用资金可用
+            creditavlChange=ArithUtilR.sub(lastcreditavl,precreditavl);
+            creditavlamt=orderfrzamt;
+            //if(orderfrztype.equals("50perRQ")){
+            //creditavlamt=amtAddSubFee(qty*0.5,price,tradetype,);
+            //}
+            if(orderfrztype.equals("50perRQ_0S")){
+                orderfrztype="50per_0S";
+                creditavlamt=amtAddSubFee(qty,price,tradetype,orderfrztype);
+            }
+            check3=setCheckPoint("creditavl_check",creditavlamt,creditavlChange,"=");
+            orderfrzamt=0;
+            System.out.println("orderfrzamt=*********************************************************************"+orderfrzamt);
+        }
+
+        if(orderfrztype.equals("RZZSTC_DBP0S_part_creditstkcode")){
+            orderfrzamt=0;
+            check2=setCheckPoint("fundbal_check",ar.parameterData.getFrom("zxjt_pre_fundbal"),ar.parameterData.getFrom("fundbal"));
+        }
+        if(orderfrztype.contains("MQHQ")){ //级别111
+		    System.out.println("happyday1");
+            double precreditavl = Double.parseDouble(ar.parameterData.getFrom("zxjt_pre_creditavl"));	//信用资金可用
+            if(orderfrztype.contains("MQHQ_fundavl")||orderfrztype.contains("MQHQ_creditfundavl")){
+                String creditbalStr="0.00";  //creditavlStr="0.00",
+                double creditavlDou=0;
+                if(orderfrztype.contains("MQHQ_creditfundavl")){
+                    //creditavlStr=ar.parameterData.getFrom("zxjt_pre_creditavl");
+                    creditavlDou=ArithUtilR.sub(precreditavl,orderfrzamt);
+                    creditbalStr=ar.parameterData.getFrom("zxjt_pre_creditbal");
+                    System.out.println("creditavlStr="+creditavlStr);
+                }
+                if(orderfrztype.contains("MQHQ_creditfundavl_all")||orderfrztype.contains("MQHQ_creditfundavl_part")){
+                    //boolean check2=setCheckPoint("fundavl_check",orderfrzamt,fundavlChange,"=");  资金变化为0
+                    orderfrzamt=0;
+                    System.out.println("creditavlDou="+creditavlDou);
+                }
+                else if(orderfrztype.equals("MQHQ_creditfundavl_fundavl_all")){
+                    orderfrzamt=ArithUtilR.sub(orderfrzamt,precreditavl);
+                    creditavlDou=0;
+                }
+                else{
+                }
+                System.out.println("creditavlStr="+creditavlStr);
+                check3=setCheckPoint("creditavl_check",creditavlDou,Double.parseDouble(ar.parameterData.getFrom("creditavl")),"=");			   //0
+                check4=setCheckPoint("creditbal_check",creditbalStr,ar.parameterData.getFrom("creditbal"));	        //0
+            }
+            //MQHQ_daibao //买券还券??待报
+            heck2=setCheckPoint("fundbal_check",ar.parameterData.getFrom("zxjt_pre_fundbal"),ar.parameterData.getFrom("fundbal"));
+        }//        if(orderfrztype.contains("MQHQ")){ //级别111
+        if(orderfrztype.contains("XQHQ")&&!orderfrztype.contains("zuhe")){ //级别111
+            double precreditavl = Double.parseDouble(ar.parameterData.getFrom("zxjt_pre_creditavl"));	//信用资金可用
+            double creditavlDou=0;
+            if(orderfrztype.contains("XQHQ_all")||orderfrztype.contains("XQHQ_part")){
+                String creditbalStr=ar.parameterData.getFrom("zxjt_pre_creditbal");  //XQHQ_daibao 没做此值的值传递，不能放在上一层
+                if(orderfrztype.equals("XQHQ_all_stkcode_weidengbi")||orderfrztype.equals("XQHQ_part_stkcode_notIntTimes")){
+                    creditavlDou=precreditavl;
+                    orderfrzamt=0;
+                }
+                else{
+                    //boolean check2=setCheckPoint("fundavl_check",orderfrzamt,fundavlChange,"=");  资金变化为0
+                    //成交后fundavl=委托前fundavl+if(成交前creditavl>成交数量/matchqty*clearamt,成交数量/matchqty*clearamt,成交前creditavl)
+                    //成交后creditavl=if(成交前creditavl>成交数量/matchqty*clearamt,成交前creditavl-成交数量/matchqty*clearamt,0)
+                    double fundavlamt=Double.parseDouble(ar.parameterData.getFrom("zxjt_yq_orderfrzamt_fundavl")); // 合约值传递过来的资金变化值
+                    if(precreditavl>fundavlamt){
+                        creditavlDou=ArithUtilR.sub(precreditavl,fundavlamt);
+                        orderfrzamt=fundavlamt;
+                        System.out.println("111creditavlDou="+creditavlDou);
+                    }
+                    else{   //creditavlDou=0;
+                        orderfrzamt=precreditavl;
+                        System.out.println("222creditavlDou="+creditavlDou);
+                    }
+                    //		 if(orderfrztype.contains("XQHQ_part_creditstkcode_prior")){
+                    //			 creditbalStr="0.00";
+                    //		}
+                    check2=setCheckPoint("fundbal_check",ar.parameterData.getFrom("zxjt_pre_fundbal"),ar.parameterData.getFrom("fundbal"));
+                    check4=setCheckPoint("creditbal_check",creditbalStr,ar.parameterData.getFrom("creditbal"));	        //0
+                }
+            }
+            else if(orderfrztype.contains("XQHQ_daibao")||orderfrztype.contains("XQHQ_feidan")){
+                orderfrzamt=prefundavl;
+                fundavlChange=lastfundavl;
+                creditavlDou=precreditavl;
+            }
+            check3=setCheckPoint("creditavl_check",creditavlDou,Double.parseDouble(ar.parameterData.getFrom("creditavl")),"=");			   //0
+        }//        if(orderfrztype.contains("XQHQ")){ //级别111
+        if(orderfrztype.contains("QGND")&&!orderfrztype.equals("QGND_XQHQ_all_stkcode")){//级别111
+            //if(orderfrztype.contains("MQHQ_fundavl")||orderfrztype.contains("MQHQ_creditfundavl")){
+            //	String creditbalStr="0.00";  //creditavlStr="0.00",
+            double precreditavl = Double.parseDouble(ar.parameterData.getFrom("zxjt_pre_creditavl"));	//信用资金可用
+            double lastcreditavl = Double.parseDouble(ar.parameterData.getFrom("creditavl"));	//信用资金可用
+            double creditavlChange=lastcreditavl;
+            double creditavlamt=precreditavl;
+            //creditavlChange=ArithUtilR.sub(lastcreditavl,precreditavl);
+            if(orderfrztype.contains("QGND_RZ")||orderfrztype.equals("QGND_DBP0t")){
+                orderfrzamt=0;
+            }
+            if(orderfrztype.contains("QGND_RQ_0S")){  //50perRQ_0S  10050perRQ_0S
+                creditavlChange=ArithUtilR.sub(lastcreditavl,precreditavl);
+                creditavlamt=orderfrzamt;
+                orderfrzamt=0;
+            }
+            System.out.println("11111creditavlamt="+creditavlamt);
+            check3=setCheckPoint("creditavl_check",creditavlamt,creditavlChange,"=");			   //0
+            check4=setCheckPoint("creditbal_check",ar.parameterData.getFrom("zxjt_pre_creditbal"),ar.parameterData.getFrom("creditbal"));	        //0
+            check2=setCheckPoint("fundbal_check",ar.parameterData.getFrom("zxjt_pre_fundbal"),ar.parameterData.getFrom("fundbal"));
+        }//        if(orderfrztype.contains("MQHQ")){ //级别111
+
+
+		//---------------------------------------------------------------------------------------------------------------------------------------
+		if(orderfrztype.equals("IPO")){//IPO配售业务模块
+			if("IPOPS".equals(tradetype)||"".equals(tradetype)){//配售时，资金不发生变化
+				orderfrzamt=0;
+				System.out.println("---------------------------------------------------------------------------------lastfundavl: "+lastfundavl);
+				System.out.println("---------------------------------------------------------------------------------prefundavl: "+prefundavl);
+				check1 = setCheckPoint("fundavl_check", orderfrzamt, fundavlChange, "=");
+			}
+
+			if("IPOSG".equals(tradetype)){//IPO申购业务模块
+				orderfrzamt = matchamt ; //申购时，资金冻结
+				check1 = setCheckPoint("fundavl_check", orderfrzamt, fundavlChange, "=");
+			}
+		}
+    }// afterorder
+
+
+
+
+    else if(usetype.equals("cancelorder")){  //级别1  //撤单
+        // orderfrztype=orderfrztype+"cancel";       //类型+撤单字符串，以此区分
+        StringBuffer sb1=new StringBuffer();
+        sb1=sb1.append(orderfrztype+"cancel");  //类型+撤单字符串，以此区分
+        orderfrztype=sb1.toString();
+        orderfrzamt =amtAddSubFee(qty,price,tradetype,orderfrztype);
+        //if(orderfrztype.contains("50per_0B")){}
+        if(orderfrztype.contains("50per_0S")){
+            fundavlChange=-fundavlChange;
+        }
+        if(orderfrztype.equals("MQHQ_daibaocancel")||orderfrztype.equals("MQHQ_feidancancel")){ //买券还券??待报
+            double prefundbal = Double.parseDouble(ar.parameterData.getFrom("zxjt_pre_fundbal")); //可用资金
+            double lastfundbal = Double.parseDouble(ar.parameterData.getFrom("fundbal")); //可用资金
+            check3=setCheckPoint("fundbal_check",prefundbal,lastfundbal,"=");
+            orderfrzamt=0;
+        }
+        if(orderfrztype.equals("XQHQ_daibaocancel")||orderfrztype.equals("XQHQ_feidancancel")){ //买券还券??待报
+            System.out.println("orderfrzamt"+orderfrzamt);
+            System.out.println("*******************************");
+            check3=setCheckPoint("creditavl_check",ar.parameterData.getFrom("zxjt_pre_creditavl"),ar.parameterData.getFrom("creditavl"));			   //0
+            orderfrzamt=0;
+        }
+
+    }
+	//lse if(usetype.equals("cancelorder")){  //级别1  //撤单
+	//if(orderfrztype.contains("0B")||orderfrztype.equals("")) { //默认买入,包括委托
+	//	fundavlChange=-fundavlChange;
+	//	orderfrzamt=0;
+	//}
+	////50per_0B
+	////orderfrzamt =orderfrzamt-amtAddSubFee(qty*0.5,price,tradetype,orderfrztype);
+	//if(orderfrztype.contains("50per_0S")) {
+	//	orderfrzamt=0;
+	//}
+	//
+    ar.parameterData.putInto("zxjt_yq_orderfrzamt",orderfrzamt.toString());
+	//unbavl
+    String creditavlCheck=ar.parameterData.getFrom("creditavl_check");
+    if(creditavlCheck.contains("信用资金")){
+        System.out.println("creditavl_check"+ar.parameterData.getFrom("creditavl_check"));
+        System.out.println("creditavl_check"+creditavlCheck);
+        if(creditavlCheck.equals("信用资金可用减少"))
+        {
+            orderfrzamtCreditavl=orderfrzamt;
+            orderfrzamt=0;
+            creditavlChange=-creditavlChange;
+        }
+        if(creditavlCheck.equals("信用资金可用为0"))
+        {
+            orderfrzamtCreditavl=0;
+            creditavlChange=lastcreditavl;
+            fundavlChange=ArithUtilR.add(fundavlChange,precreditavl);
+        }
+        if(creditavlCheck.equals("信用资金不变"))
+        {
+            orderfrzamtCreditavl=0;
+        }
+
+        check2=setCheckPoint("creditavl_check",orderfrzamtCreditavl,creditavlChange,"=");
+    }
+	if(!orderfrztype.contains("zuhe")){
+    check1=setCheckPoint("fundavl_check",orderfrzamt,fundavlChange,"=");
+	}
+    if(!check1||!check2||!check3||!check4)
+    {
+        throw new Exception("校验失败");
+    }
+}
