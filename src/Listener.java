@@ -2,6 +2,7 @@
  * Created by 程浩 on 2020/4/10
  */
 
+import bsh.EvalError;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -10,6 +11,7 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.message.MessageExt;
 
 import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -33,7 +35,13 @@ public class Listener {
                         System.out.println(new Date());
                         System.out.println(caseName);
                         System.out.println("********************************************************************************");
-                        Run.run(caseData, caseName);
+                        try {
+                            Run.run(caseData, caseName);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (EvalError evalError) {
+                            evalError.printStackTrace();
+                        }
                     }
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
