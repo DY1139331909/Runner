@@ -1,6 +1,7 @@
+import java.util.HashMap;
 System.out.println(caseData.compName);
 System.out.println(caseData.getFrom("acct_match"));
-HashMap<String, String> para = new HashMap<String, String>();
+HashMap para = new HashMap();
 para.put("szServerName", "KCBP1");
 para.put("nProtocal", "0");
 para.put("szAddress", "10.1.160.167");
