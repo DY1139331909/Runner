@@ -33,8 +33,9 @@ public class Run {
         while (iterComp.hasNext()) {
             Map.Entry entryComp = (Map.Entry) iterComp.next();
             String compName = entryComp.getKey().toString();
+            data.setCompName(compName);
             System.out.println(compName);
-            bshRunner.runBsh(".\\scripts\\" + "账户信息查询" + ".bsh");
+            bshRunner.runBsh(".\\scripts\\" + compName + ".bsh");
         }
 
     }

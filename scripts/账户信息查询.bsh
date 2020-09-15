@@ -1,2 +1,2 @@
-System.out.println(caseData);
 System.out.println(caseData.compName);
+System.out.println(caseData.getFrom("acct_match"));
