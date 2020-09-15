@@ -13,13 +13,16 @@ import java.io.IOException;
 
 public class BshRunner {
     public CaseData data;
-    private Interpreter i = new Interpreter(); // Construct an interpreter
-    public BshRunner(CaseData data) {
+    public Interpreter i = new Interpreter(); // Construct an interpreter
+    public void setData() throws EvalError {
+        this.i.set("caseData", this.data);
+    }
+    public BshRunner(CaseData data) throws EvalError {
         this.data = data;
+        setData();
     }
 
     public int runBsh(String source) throws IOException, EvalError {
-        i.set("caseData", this.data);
         i.source(source);
         return 0;
     }
