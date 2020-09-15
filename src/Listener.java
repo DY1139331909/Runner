@@ -50,5 +50,8 @@ public class Listener {
         });
         // 启动消费者
         consumer.start();
+
+
     }
+
 }

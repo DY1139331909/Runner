@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Created by 程浩 on 2020/4/26
  */
-public class KCBPBusiness implements Business{
+public class KCBPBusiness implements Business {
     int ret;
     PointerByReference KCBPCLIHANDLE = new PointerByReference(Pointer.NULL);
     static Pointer hHandle = null;

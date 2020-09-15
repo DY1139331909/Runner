@@ -1,6 +1,3 @@
-import com.sun.javafx.collections.MappingChange;
-
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 /**
