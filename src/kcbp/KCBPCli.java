@@ -1,8 +1,7 @@
+package kcbp;
+
 import com.sun.jna.*;
 import com.sun.jna.ptr.*;
-
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -21,10 +20,9 @@ import java.nio.charset.StandardCharsets;
   int*	        IntByReference
 * */
 public class KCBPCli {
-
     public interface KCBP extends Library {
 
-        KCBP INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\KCBPCli" : "c"), KCBP.class);
+        KCBP INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\kcbp.KCBPCli" : "c"), KCBP.class);
         int KCBP_SERVERNAME_MAX = 32;
         int KCBP_DESCRIPTION_MAX = 32;
 

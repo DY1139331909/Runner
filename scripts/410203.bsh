@@ -50,7 +50,7 @@ dataMap.put("tc_flag",ar.parameterData.getFrom("tc_flag"));
 dataMap.put("tc_checkStr",ar.parameterData.getFrom("tc_checkStr"));
 dataMap.put("tc_allowerror",ar.parameterData.getFrom("tc_allowerror"));
 dataMap.put("tc_result",ar.parameterData.getFrom("tc_result"));
-com.spasvo.kcbp.KCBPBusiness.getInstance().fundQueryBusiness(dataMap);
+com.spasvo.kcbp.kcbp.KCBPBusiness.getInstance().fundQueryBusiness(dataMap);
 returnData(dataMap);
 if(dataMap.get("resultstate").equals("1")){throw new Exception("") ;}
 //如果是zxjt_price_type为空，取价格平均值

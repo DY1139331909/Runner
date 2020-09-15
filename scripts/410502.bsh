@@ -42,7 +42,7 @@ dataMap.put("creditbal",ar.parameterData.getFrom("creditbal"));
 dataMap.put("creditavl",ar.parameterData.getFrom("creditavl"));
 dataMap.put("tc_allowerror",ar.parameterData.getFrom("tc_allowerror"));
 dataMap.put("tc_result",ar.parameterData.getFrom("tc_result"));
-com.spasvo.kcbp.KCBPBusiness.getInstance().fundQueryBusiness(dataMap);
+com.spasvo.kcbp.kcbp.KCBPBusiness.getInstance().fundQueryBusiness(dataMap);
 returnData(dataMap);
 if(dataMap.get("resultstate").equals("1")){throw new Exception("") ;}
 
