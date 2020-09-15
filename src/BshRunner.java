@@ -5,6 +5,8 @@
 
 import bsh.EvalError;
 import bsh.Interpreter;
+import kcbp.Business;
+import kcbp.KCBPBusiness;
 import tools.BaseConnectMysql;
 import tools.BaseConnectSQLServer;
 import tools.CaseData;
@@ -19,13 +21,24 @@ import java.util.List;
 public class BshRunner {
     public CaseData data;
     public Interpreter i = new Interpreter(); // Construct an interpreter
+    public Business cli;
 
     public void setData() throws EvalError {
-        this.i.set("BshRunner",this);
+        this.i.set("BshRunner", this);
         this.i.set("caseData", this.data);
     }
 
-    public BshRunner(CaseData data) throws EvalError {
+
+    public void setCli(String cli) {
+        if (cli.equals("KCBP")) {
+            this.cli = new KCBPBusiness();
+        }
+    }
+
+    public BshRunner(String cli, CaseData data) throws EvalError {
+//        设置测试客户端类型
+        setCli(cli);
+//        设置测试用例数据
         this.data = data;
         setData();
     }

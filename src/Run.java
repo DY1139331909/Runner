@@ -28,7 +28,7 @@ public class Run {
         CaseData data = new CaseData();
         data.initCaseData(caseData,caseName);
         Iterator iterComp = data.caseData.entrySet().iterator();
-        BshRunner bshRunner = new BshRunner(data);
+        BshRunner bshRunner = new BshRunner("KCBP",data);
         while (iterComp.hasNext()) {
             Map.Entry entryComp = (Map.Entry) iterComp.next();
             String compName = entryComp.getKey().toString();
