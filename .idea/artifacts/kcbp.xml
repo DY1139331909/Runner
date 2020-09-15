@@ -3,9 +3,13 @@
     <output-path>$PROJECT_DIR$/out/artifacts/kcbp</output-path>
     <root id="archive" name="kcbp.jar">
       <element id="directory" name="kcbp">
-        <element id="file-copy" path="$PROJECT_DIR$/src/kcbp/Business.java" />
-        <element id="file-copy" path="$PROJECT_DIR$/src/kcbp/KCBPBusiness.java" />
-        <element id="file-copy" path="$PROJECT_DIR$/src/kcbp/KCBPCli.java" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/Runner/kcbp/Business.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/Runner/kcbp/KCBPBusiness.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/Runner/kcbp/KCBPCli$KCBP$tagKCBPConnectOption$ByReference.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/Runner/kcbp/KCBPCli$KCBP$tagKCBPConnectOption$ByValue.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/Runner/kcbp/KCBPCli$KCBP$tagKCBPConnectOption.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/Runner/kcbp/KCBPCli$KCBP.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/Runner/kcbp/KCBPCli.class" />
       </element>
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
