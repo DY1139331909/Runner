@@ -36,6 +36,5 @@ public class Run {
             System.out.println(compName);
             bshRunner.runBsh(".\\scripts\\" + compName + ".bsh");
         }
-
     }
 }

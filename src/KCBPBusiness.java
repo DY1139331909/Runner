@@ -12,11 +12,23 @@ import java.util.Map;
  * Created by 程浩 on 2020/4/26
  */
 public class KCBPBusiness implements Business {
+
+    public static void main(String[] args) {
+        System.out.println("main");
+    }
+
     int ret;
     PointerByReference KCBPCLIHANDLE = new PointerByReference(Pointer.NULL);
     static Pointer hHandle = null;
 
     public KCBPBusiness() {
+    }
+
+//    主业务方法
+    public void trade(Map para){
+        connect(para);
+        business(para);
+        disConnect();
     }
 
     public int connect(Map connectParameter) {
