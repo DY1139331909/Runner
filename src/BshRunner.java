@@ -5,20 +5,22 @@
 
 import bsh.EvalError;
 import bsh.Interpreter;
+import tools.CaseData;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 
 
 public class BshRunner {
-    public static void main(String[] args) throws IOException, EvalError {
-        System.out.println("start run");
-        runBsh("src/test.bsh");
+    public CaseData data;
+    private Interpreter i = new Interpreter(); // Construct an interpreter
+    public BshRunner(CaseData data) {
+        this.data = data;
     }
 
-    public static int runBsh(String source) throws IOException, EvalError {
-        Interpreter i = new Interpreter();  // Construct an interpreter
+    public int runBsh(String source) throws IOException, EvalError {
+        i.set("caseData", this.data);
         i.source(source);
-        i.run();
         return 0;
     }
 }

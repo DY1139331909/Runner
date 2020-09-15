@@ -1,3 +1,2 @@
-System.out.println("123");
-source("\\src\\tools\\CaseData.java");
-System.out.println(CaseData.compName);
+System.out.println(caseData);
+System.out.println(caseData.compName);

@@ -29,11 +29,11 @@ public class Run {
         CaseData data = new CaseData();
         data.initCaseData(caseData,caseName);
         Iterator iterComp = data.caseData.entrySet().iterator();
+        BshRunner bshRunner = new BshRunner(data);
         while (iterComp.hasNext()) {
             Map.Entry entryComp = (Map.Entry) iterComp.next();
             String compName = entryComp.getKey().toString();
             System.out.println(compName);
-            BshRunner bshRunner = new BshRunner();
             bshRunner.runBsh(".\\scripts\\" + "账户信息查询" + ".bsh");
         }
 
