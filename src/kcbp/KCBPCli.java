@@ -22,7 +22,7 @@ import com.sun.jna.ptr.*;
 public class KCBPCli {
     public interface KCBP extends Library {
 
-        KCBP INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\kcbp.KCBPCli" : "c"), KCBP.class);
+        KCBP INSTANCE = Native.load((Platform.isWindows() ? ".\\dll\\kcbp\\KCBPCli.dll" : "c"), KCBP.class);
         int KCBP_SERVERNAME_MAX = 32;
         int KCBP_DESCRIPTION_MAX = 32;
 
