@@ -26,8 +26,8 @@ public class KCBPBusiness implements Business {
     public KCBPBusiness() {
     }
 
-//    主业务方法
-    public void trade(Map para){
+    //    主业务方法
+    public void trade(Map para) {
         connect(para);
         business(para);
         disConnect();
@@ -83,6 +83,9 @@ public class KCBPBusiness implements Business {
                     String[] colNamesArr = colNames.split(",");
                     ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_RsFetchRow(hHandle);
                     getRs(firstResultMap, colNamesArr);
+                    for (Map.Entry s : firstResultMap.entrySet()) {
+                        System.out.println(s.getKey() + ":" + s.getValue());
+                    }
 //                    开始处理第二结果集
                     if (firstResultMap.get("CODE").equals("0")) {
 //                        第一结果集CODE为0则开始处理第二结果集
@@ -94,11 +97,14 @@ public class KCBPBusiness implements Business {
                         System.out.println(colNames);
                         colNamesArr = colNames.split(",");
                         ArrayList<HashMap<String, String>> secRsArray = new ArrayList<>();
+                        HashMap<String, String> secResultMap = new HashMap<>();
                         while (KCBPCli.KCBP.INSTANCE.KCBPCLI_RsFetchRow(hHandle) == 0) {
 //                            遍历第二结果集
                             ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_RsGetColNames(hHandle, pszInfo, 1024);
-                            HashMap<String, String> secResultMap = new HashMap<>();
                             getRs(secResultMap, colNamesArr);
+                        }
+                        for (Map.Entry s : secResultMap.entrySet()) {
+                            System.out.println(s.getKey() + ":" + s.getValue());
                         }
                     }
                 }
@@ -110,11 +116,18 @@ public class KCBPBusiness implements Business {
 
     private void getRs(HashMap<String, String> ResultMap, String[] colNamesArr) {
         for (int i = 1; i <= colNamesArr.length; i++) {
+//            System.out.println(colNamesArr[i - 1]);
             Pointer vlu = new Memory(256);
             ret = KCBPCli.KCBP.INSTANCE.KCBPCLI_RsGetCol(hHandle, i, vlu);
             String vluStr = vlu.getString(0, "gbk");
-            System.out.println(colNamesArr[i - 1] + ":" + vluStr);
-            ResultMap.put(colNamesArr[i - 1], vluStr);
+//            System.out.println(colNamesArr[i - 1] + ":" + vluStr);
+            if (!ResultMap.containsKey(colNamesArr[i - 1])) {
+//                如果是第一行结果
+                ResultMap.put(colNamesArr[i - 1], vluStr);
+            } else {
+//                结果行数超过第一行
+                ResultMap.put(colNamesArr[i - 1], ResultMap.get(colNamesArr[i - 1]) + "," + vluStr);
+            }
         }
     }
 

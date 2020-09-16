@@ -24,6 +24,6 @@ para.put("market", "0");
 para.put("stklevel", "N");
 para.put("stkcode", "000001");
 para.put("poststr", "");
-para.put("rowcount", "");
+para.put("rowcount", "100");
 para.put("stktype", "0");
 BshRunner.cli.trade(para);

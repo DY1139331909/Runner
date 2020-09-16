@@ -36,7 +36,7 @@ public class KCBPBusinessTest {
         para.put("funcid", "410203");
         para.put("market", "0");
         para.put("stklevel", "N");
-        para.put("stkcode", "000001");
+        para.put("stkcode", "");
         para.put("poststr", "");
         para.put("rowcount", "");
         para.put("stktype", "0");
