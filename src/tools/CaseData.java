@@ -85,8 +85,8 @@ public class CaseData {
     }
 
     public void putInto(String field, Object values) {
-
-
+        String[] valueArr = caseData.get(this.compName).get(field);
+        valueArr[1] = values.toString();
     }
 
     public String getFrom(String field) {
